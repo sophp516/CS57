@@ -41,7 +41,7 @@
 %start prog
 
 %%
-prog : extern_print extern_read func { $$ = createProg($1, $2, $3); }
+prog : extern_print extern_read func { root = createProg($1, $2, $3); }
 extern_print : EXTERN VOID PRINT '(' INT ')' ';' { $$ = createExtern("print"); }
 extern_read : EXTERN INT READ '(' ')' ';' { $$ = createExtern("read"); }
 func : INT IDENTIFIER '(' param ')' block_stmt { $$ = createFunc($2, $4, $6); }
@@ -64,15 +64,48 @@ stmt : assign
      | while_block
      | print_fn
 if_block : IF '(' relational_expr ')' block_stmt ELSE block_stmt { $$ = createIf($3, $5, $7); }
+         | IF '(' relational_expr ')' block_stmt ELSE stmt {
+                                                                    std::vector<astNode*>* else_block = new std::vector<astNode*>();
+                                                                    else_block->push_back($7);
+                                                                    astNode* else_node = createBlock(else_block);
+                                                                    $$ = createIf($3, $5, else_node);
+                                                                  }
          | IF '(' relational_expr ')' block_stmt { $$ = createIf($3, $5); }
+         | IF '(' relational_expr ')' stmt {
+                                             std::vector<astNode*>* then_block = new std::vector<astNode*>();
+                                             then_block->push_back($5);
+                                             astNode* then_node = createBlock(then_block);
+                                             $$ = createIf($3, then_node);
+                                           }
+         | IF '(' relational_expr ')' stmt ELSE block_stmt {
+                                                             std::vector<astNode*>* then_block = new std::vector<astNode*>();
+                                                             then_block->push_back($5);
+                                                             astNode* then_node = createBlock(then_block);
+                                                             $$ = createIf($3, then_node, $7);
+                                                           }
+         | IF '(' relational_expr ')' stmt ELSE stmt {
+                                                       std::vector<astNode*>* then_block = new std::vector<astNode*>();
+                                                       then_block->push_back($5);
+                                                       astNode* then_node = createBlock(then_block);
+                                                       std::vector<astNode*>* else_block = new std::vector<astNode*>();
+                                                       else_block->push_back($7);
+                                                       astNode* else_node = createBlock(else_block);
+                                                       $$ = createIf($3, then_node, else_node);
+                                                     }
 while_block : WHILE '(' relational_expr ')' block_stmt { $$ = createWhile($3, $5); }
+            | WHILE '(' relational_expr ')' stmt {
+                                                   std::vector<astNode*>* body_block = new std::vector<astNode*>();
+                                                   body_block->push_back($5);
+                                                   astNode* body_node = createBlock(body_block);
+                                                   $$ = createWhile($3, body_node);
+                                                 }
 decl : INT IDENTIFIER ';' { $$ = createDecl($2); }
 assign : IDENTIFIER '=' arithmetic_expr ';' { $$ = createAsgn(createVar($1), $3); }
        | IDENTIFIER '=' read_fn ';' { $$ = createAsgn(createVar($1), $3); }
 return : RETURN expr ';' { $$ = createRet($2); }
 expr : arithmetic_expr | relational_expr
 print_fn : PRINT '(' arithmetic_expr ')' ';' { $$ = createCall("print", $3); }
-read_fn : READ '(' ')' ';' { $$ = createCall("read", NULL); }
+read_fn : READ '(' ')' { $$ = createCall("read", NULL); }
 arithmetic_expr : term { $$ = $1; }
                 | '-' term { $$ = createUExpr($2, uminus); }
                 | term '*' term { $$ = createBExpr($1, $3, mul); }

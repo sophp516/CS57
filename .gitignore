@@ -1,0 +1,13 @@
+# Compiled executables
+*.out
+
+# Object files
+*.o
+
+# Generated lex/yacc files
+lex.yy.c
+y.tab.c
+y.tab.h
+
+# Test output files
+test*
