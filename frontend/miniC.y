@@ -7,13 +7,14 @@
 %{
     #include<stdio.h>
     #include "ast/ast.h"
+    #include "symantic_analysis.h"
     extern int yylex();
     extern int yylex_destroy();
     extern int yywrap();
     int yyerror(char*);
     extern FILE *yyin;
 
-    astNode root;
+    astNode* root;
 %}
 
 %union {
@@ -137,7 +138,18 @@ int main(int argc, char* argv[]) {
     }
 
     yyparse();
+    
     if (argc == 2) fclose(yyin);
+    
+    // Perform semantic analysis
+    if (checkProg(root)) {
+        // Semantic analysis passed
+    } else {
+        fprintf(stderr, "Faulty program: check for errors in the grammar\n");
+        yylex_destroy();
+        return(1);
+    }
+    
     yylex_destroy();
     return(0);
 }

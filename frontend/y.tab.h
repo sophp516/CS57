@@ -97,7 +97,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "miniC.y"
+#line 20 "miniC.y"
 
     astNode* node;
     std::vector<astNode*>* stmt_list;
