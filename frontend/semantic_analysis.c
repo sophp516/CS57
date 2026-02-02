@@ -19,12 +19,17 @@ bool addVarToScope(std::string varName)
 {
     if (symbolTable.empty()) return false;
 
-    // Check if variable already exists in current scope (duplicate in same scope)
+    // Check if variable already exists in current scope
     std::vector<std::string>& currScope = symbolTable.back();
     for (size_t i = 0; i < currScope.size(); i++) {
         if (currScope[i] == varName) {
             return false;
         }
+    }
+    
+    // Check if variable exists in any parent scope (can't redeclare/shadow)
+    if (varExists(varName)) {
+        return false;
     }
     
     currScope.push_back(varName);
@@ -67,47 +72,11 @@ bool checkFunc(astNode* func)
         }
     }
     
-    // Function body should be in the same scope as parameters
-    // Process the function body block directly without pushing a new scope
-    astNode* body = func->func.body;
-    if (body == NULL || body->type != ast_stmt || body->stmt.type != ast_block) {
-        popScope();
-        return false;
-    }
-    
-    std::vector<astNode*>* stmt_list = body->stmt.block.stmt_list;
-    if (stmt_list == NULL) {
-        popScope();
-        return true;
-    }
-    
-    // First pass: process all declarations in function body (same scope as parameter)
-    for (size_t i = 0; i < stmt_list->size(); i++) {
-        astNode* node = (*stmt_list)[i];
-        if (node == NULL) continue;
-        
-        if (node->type == ast_stmt && node->stmt.type == ast_decl) {
-            std::string varName(node->stmt.decl.name);
-            if (!addVarToScope(varName)) {
-                popScope();
-                return false; // Duplicate declaration (including parameter)
-            }
-        }
-    }
-    
-    // Second pass: check all statements
-    for (size_t i = 0; i < stmt_list->size(); i++) {
-        astNode* node = (*stmt_list)[i];
-        if (node == NULL) continue;
-        
-        if (!checkStmt(node)) {
-            popScope();
-            return false;
-        }
-    }
+    bool result = checkBlock(func->func.body);
     
     popScope();
-    return true;
+    
+    return result;
 }
 
 bool checkBlock(astNode* block)
@@ -163,7 +132,7 @@ bool checkStmt(astNode* stmt)
             // Already handled in checkBlock's first pass
             return true;
             
-        case ast_asgn: {
+        case ast_asgn:
             // Check lhs (variable being assigned to) and rhs (expression)
             if (stmt->stmt.asgn.lhs == NULL || stmt->stmt.asgn.rhs == NULL) return false;
             
@@ -176,13 +145,12 @@ bool checkStmt(astNode* stmt)
             
             // Check rhs expression
             return checkExpr(stmt->stmt.asgn.rhs);
-        }
             
         case ast_ret:
             if (stmt->stmt.ret.expr == NULL) return false;
             return checkExpr(stmt->stmt.ret.expr);
             
-        case ast_call: {
+        case ast_call:
             // Check if it's a print/read call (these are extern, always valid)
             if (stmt->stmt.call.name != NULL) {
                 std::string callName(stmt->stmt.call.name);
@@ -195,7 +163,6 @@ bool checkStmt(astNode* stmt)
                 }
             }
             return false; // Unknown function call
-        }
             
         case ast_block:
             return checkBlock(stmt);
