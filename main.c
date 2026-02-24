@@ -18,7 +18,7 @@ extern int yylex_destroy();
 extern int yywrap();
 
 int main(int argc, char** argv) {
-    // Check command line arguments
+
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <input_file>\n", argv[0]);
         return 1;
@@ -26,33 +26,30 @@ int main(int argc, char** argv) {
     
     char* filename = argv[1];
     
-    // Open input file
+    // open input file
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         fprintf(stderr, "Error: Cannot open file '%s'\n", filename);
         return 1;
     }
     
-    // Set input file for lexer
     yyin = file;
     
-    // Initialize root to NULL
+    // initialize root to NULL
     root = NULL;
     
-    // Run syntax analysis and build AST
+    // run syntax analysis and build AST
     int parse_result = yyparse();
     
-    // Close file
     fclose(file);
     
-    // Check if parser worked correctly
     if (parse_result != 0 || root == NULL) {
         fprintf(stderr, "Error: Parsing failed\n");
         yylex_destroy();
         return 1;
     }
     
-    // Run semantic analysis
+    // run semantic analysis
     bool semantic_ok = checkProg(root);
     if (!semantic_ok) {
         fprintf(stderr, "Error: Semantic analysis failed\n");
@@ -61,7 +58,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    // Run IR builder to get LLVM IR module
+    // run IR builder to get LLVM IR module
     LLVMModuleRef module = buildIR(root);
     if (module == NULL) {
         fprintf(stderr, "Error: IR generation failed\n");
@@ -70,7 +67,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     
-    // Run optimizer
+    // run optimizer
     LLVMModuleRef optimized_module = optimizeModule(module);
     if (optimized_module == NULL) {
         fprintf(stderr, "Warning: Optimization failed, using unoptimized module\n");
@@ -80,7 +77,6 @@ int main(int argc, char** argv) {
     // Print optimized module to file (optional - for debugging)
     // LLVMPrintModuleToFile(optimized_module, "output.ll", NULL);
     
-    // Cleanup
     freeNode(root);
     yylex_destroy();
     LLVMDisposeModule(optimized_module);
