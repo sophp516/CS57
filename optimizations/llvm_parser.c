@@ -749,6 +749,8 @@ void walkGlobalValues(LLVMModuleRef module){
         }
 }
 
+// Main function moved to assignments/main.c
+/*
 int main(int argc, char** argv)
 {
 	LLVMModuleRef m;
@@ -773,3 +775,4 @@ int main(int argc, char** argv)
 	
 	return 0;
 }
+*/

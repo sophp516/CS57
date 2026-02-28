@@ -1,5 +1,6 @@
+#line 2 "frontend/lex.yy.c"
 
-#line 3 "lex.yy.c"
+#line 4 "frontend/lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -476,15 +477,15 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "miniC.l"
-#line 2 "miniC.l"
+#line 1 "frontend/miniC.l"
+#line 2 "frontend/miniC.l"
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include "y.tab.h"
 int line = 1;
-#line 487 "lex.yy.c"
-#line 488 "lex.yy.c"
+#line 488 "frontend/lex.yy.c"
+#line 489 "frontend/lex.yy.c"
 
 #define INITIAL 0
 
@@ -701,9 +702,9 @@ YY_DECL
 		}
 
 	{
-#line 9 "miniC.l"
+#line 9 "frontend/miniC.l"
 
-#line 707 "lex.yy.c"
+#line 708 "frontend/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -763,112 +764,112 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 10 "miniC.l"
+#line 10 "frontend/miniC.l"
 { line++; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 11 "miniC.l"
+#line 11 "frontend/miniC.l"
 { printf("Line %d: EXTERN\n", line); return EXTERN; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 12 "miniC.l"
+#line 12 "frontend/miniC.l"
 { printf("Line %d: INT\n", line); return INT; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 13 "miniC.l"
+#line 13 "frontend/miniC.l"
 { printf("Line %d: VOID\n", line); return VOID; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 14 "miniC.l"
+#line 14 "frontend/miniC.l"
 { printf("Line %d: RETURN\n", line); return RETURN; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 15 "miniC.l"
+#line 15 "frontend/miniC.l"
 { printf("Line %d: PRINT\n", line); return PRINT; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 16 "miniC.l"
+#line 16 "frontend/miniC.l"
 { printf("Line %d: READ\n", line); return READ; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 17 "miniC.l"
+#line 17 "frontend/miniC.l"
 { printf("Line %d: IF\n", line); return IF; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 18 "miniC.l"
+#line 18 "frontend/miniC.l"
 { printf("Line %d: ELSE\n", line); return ELSE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 19 "miniC.l"
+#line 19 "frontend/miniC.l"
 { printf("Line %d: WHILE\n", line); return WHILE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 21 "miniC.l"
+#line 21 "frontend/miniC.l"
 { printf("Line %d: '{'\n", line); return '{'; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 22 "miniC.l"
+#line 22 "frontend/miniC.l"
 { printf("Line %d: '}'\n", line); return '}'; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 23 "miniC.l"
+#line 23 "frontend/miniC.l"
 { printf("Line %d: '('\n", line); return '('; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 24 "miniC.l"
+#line 24 "frontend/miniC.l"
 { printf("Line %d: ')'\n", line); return ')'; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 25 "miniC.l"
+#line 25 "frontend/miniC.l"
 { printf("Line %d: ';'\n", line); return ';'; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 27 "miniC.l"
+#line 27 "frontend/miniC.l"
 { printf("Line %d: '='\n", line); return '='; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 28 "miniC.l"
+#line 28 "frontend/miniC.l"
 { printf("Line %d: '>'\n", line); return '>'; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 29 "miniC.l"
+#line 29 "frontend/miniC.l"
 { printf("Line %d: '<'\n", line); return '<'; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 30 "miniC.l"
+#line 30 "frontend/miniC.l"
 { printf("Line %d: '*'\n", line); return '*'; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 31 "miniC.l"
+#line 31 "frontend/miniC.l"
 { printf("Line %d: '+'\n", line); return '+'; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 32 "miniC.l"
+#line 32 "frontend/miniC.l"
 { printf("Line %d: '-'\n", line); return '-'; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 34 "miniC.l"
+#line 34 "frontend/miniC.l"
 { 
                 yylval.num = atoi(yytext);
                 printf("Line %d: NUMBER (%d)\n", line, yylval.num);
@@ -877,7 +878,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 40 "miniC.l"
+#line 40 "frontend/miniC.l"
 {   
                             yylval.name = strdup(yytext);
                             printf("Line %d: IDENTIFIER (%s)\n", line, yytext);
@@ -886,20 +887,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 46 "miniC.l"
+#line 46 "frontend/miniC.l"
 { /* skip whitespace */ }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 48 "miniC.l"
+#line 48 "frontend/miniC.l"
 { printf("Line %d: UNKNOWN CHAR '%c'\n", line, yytext[0]); return yytext[0]; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 49 "miniC.l"
+#line 49 "frontend/miniC.l"
 ECHO;
 	YY_BREAK
-#line 903 "lex.yy.c"
+#line 904 "frontend/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1904,7 +1905,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 49 "miniC.l"
+#line 49 "frontend/miniC.l"
 
 
 int yywrap() {

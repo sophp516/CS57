@@ -130,7 +130,8 @@ static void preprocessVars(LLVMBuilderRef builder, std::map<std::string, LLVMVal
                 LLVMTypeRef intType = LLVMInt32Type();
                 LLVMValueRef alloca = LLVMBuildAlloca(builder, intType, newVarName);
             
-                LLVMSetAlignment(alloca, 4);
+                // Note: // LLVMSetAlignment may cause issues - try without it first
+                // // LLVMSetAlignment(alloca, 4);
                 
                 varMap[std::string(newVarName)] = alloca;
                 
@@ -200,7 +201,7 @@ static LLVMValueRef createTermRef(LLVMBuilderRef builder, astNode* node,
             }
             LLVMValueRef allocaRef = varMap[std::string(varName)];
             
-            LLVMValueRef loadRef = LLVMBuildLoad(builder, LLVMInt32Type(), allocaRef, varName);
+            LLVMValueRef loadRef = LLVMBuildLoad2(builder, LLVMInt32Type(), allocaRef, varName);
             return loadRef;
         }
         
@@ -370,12 +371,14 @@ static LLVMValueRef createBlockRef(LLVMBuilderRef builder, astNode* node,
                         LLVMValueRef paramRef = createTermRef(builder, param, varMap);
                         if (paramRef != NULL && printFunc != NULL) {
                             LLVMValueRef args[] = {paramRef};
-                            LLVMBuildCall(builder, printFunc, args, 1, "print");
+                            LLVMTypeRef printFuncType = LLVMGlobalGetValueType(printFunc);
+                            LLVMBuildCall2(builder, printFuncType, printFunc, args, 1, "print");
                         }
                     }
                 } else if (funcName != NULL && strcmp(funcName, "read") == 0) {
                     if (readFunc != NULL) {
-                        LLVMBuildCall(builder, readFunc, NULL, 0, "read");
+                        LLVMTypeRef readFuncType = LLVMGlobalGetValueType(readFunc);
+                        LLVMBuildCall2(builder, readFuncType, readFunc, NULL, 0, "read");
                     }
                 }
                 break;
@@ -483,7 +486,8 @@ LLVMModuleRef buildIR(astNode* root) {
     
     LLVMModuleRef module = LLVMModuleCreateWithName("miniC_module");
     
-    LLVMSetTarget(module, "x86_64-pc-linux-gnu");
+    // Note: Not setting target/data layout - following day5 example pattern
+    // LLVMSetTarget(module, "x86_64-pc-linux-gnu");
     
     LLVMTypeRef readParamTypes[] = {};
     LLVMTypeRef readFuncType = LLVMFunctionType(LLVMInt32Type(), readParamTypes, 0, 0);
@@ -505,10 +509,6 @@ LLVMModuleRef buildIR(astNode* root) {
         return NULL;
     }
     
-    if (func->func.body != NULL) {
-        preprocessVars(builder, varMap, globalCounter, func->func.body);
-    }
-    
     const char *funcName = func->func.name;
     if (funcName == NULL) {
         funcName = "main";
@@ -527,17 +527,19 @@ LLVMModuleRef buildIR(astNode* root) {
     
     LLVMValueRef llvmFunc = LLVMAddFunction(module, funcName, funcType);
     
-    LLVMBasicBlockRef entryBB = LLVMGetEntryBasicBlock(llvmFunc);
+    // Create entry basic block explicitly (like day5 example)
+    LLVMBasicBlockRef entryBB = LLVMAppendBasicBlock(llvmFunc, "entry");
     
     LLVMPositionBuilderAtEnd(builder, entryBB);
     
-    // create alloc instructions for all variables
+    // IMPORTANT: Create parameter alloca FIRST, before preprocessVars
+    // This ensures parameter is in varMap before any variable processing
     if (func->func.param != NULL && func->func.param->type == ast_var) {
         const char *paramName = func->func.param->var.name;
         if (paramName != NULL) {
             // create allocation for parameter
             LLVMValueRef paramAlloca = LLVMBuildAlloca(builder, LLVMInt32Type(), paramName);
-            LLVMSetAlignment(paramAlloca, 4);
+            // LLVMSetAlignment(paramAlloca, 4);
             
             LLVMValueRef paramValue = LLVMGetParam(llvmFunc, 0);
             
@@ -548,14 +550,19 @@ LLVMModuleRef buildIR(astNode* root) {
         }
     }
     
+    // Preprocess variables (rename and create allocas) - must be done after function is created
+    if (func->func.body != NULL) {
+        preprocessVars(builder, varMap, globalCounter, func->func.body);
+    }
+    
     LLVMValueRef retAlloca = LLVMBuildAlloca(builder, LLVMInt32Type(), "ret_val");
-    LLVMSetAlignment(retAlloca, 4);
+    // LLVMSetAlignment(retAlloca, 4);
     
     LLVMBasicBlockRef returnBlock = LLVMAppendBasicBlock(llvmFunc, "return_block");
     
     LLVMPositionBuilderAtEnd(builder, returnBlock);
     
-    LLVMValueRef retValue = LLVMBuildLoad(builder, LLVMInt32Type(), retAlloca, "ret_val");
+    LLVMValueRef retValue = LLVMBuildLoad2(builder, LLVMInt32Type(), retAlloca, "ret_val");
     
     LLVMBuildRet(builder, retValue);
     

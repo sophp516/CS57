@@ -3,7 +3,7 @@
 #include<string>
 #include "ast/ast.h"
 
-std::vector<std::vector<std::string>> symbolTable;
+extern std::vector<std::vector<std::string>> symbolTable;
 
 // helper functions
 bool varExists(std::string varName); 

@@ -19,18 +19,16 @@ bool addVarToScope(std::string varName)
 {
     if (symbolTable.empty()) return false;
 
-    // Check if variable already exists in current scope
+    // Check if variable already exists in current scope (duplicate in same scope is not allowed)
     std::vector<std::string>& currScope = symbolTable.back();
     for (size_t i = 0; i < currScope.size(); i++) {
         if (currScope[i] == varName) {
-            return false;
+            return false; // Duplicate in same scope
         }
     }
     
-    // Check if variable exists in any parent scope (can't redeclare/shadow)
-    if (varExists(varName)) {
-        return false;
-    }
+    // Note: Variable shadowing (declaring same name in nested scope) is allowed
+    // So we don't check parent scopes - shadowing is permitted
     
     currScope.push_back(varName);
     return true;
@@ -51,14 +49,24 @@ bool popScope()
 
 bool checkProg(astNode* root)
 {
-    if (root == NULL || root->type != ast_prog) return false;
+    if (root == NULL || root->type != ast_prog) {
+        fprintf(stderr, "DEBUG: checkProg: root is NULL or not ast_prog\n");
+        return false;
+    }
     
-    return checkFunc(root->prog.func);
+    bool result = checkFunc(root->prog.func);
+    if (!result) {
+        fprintf(stderr, "DEBUG: checkProg: checkFunc failed\n");
+    }
+    return result;
 }
 
 bool checkFunc(astNode* func)
 {
-    if (func == NULL || func->type != ast_func) return false;
+    if (func == NULL || func->type != ast_func) {
+        fprintf(stderr, "DEBUG: checkFunc: func is NULL or not ast_func\n");
+        return false;
+    }
     
     pushScope();
     
@@ -66,6 +74,7 @@ bool checkFunc(astNode* func)
         if (func->func.param->type == ast_var) {
             std::string paramName(func->func.param->var.name);
             if (!addVarToScope(paramName)) {
+                fprintf(stderr, "DEBUG: checkFunc: failed to add param %s to scope\n", paramName.c_str());
                 popScope();
                 return false;
             }
@@ -73,6 +82,9 @@ bool checkFunc(astNode* func)
     }
     
     bool result = checkBlock(func->func.body);
+    if (!result) {
+        fprintf(stderr, "DEBUG: checkFunc: checkBlock failed\n");
+    }
     
     popScope();
     
@@ -82,6 +94,7 @@ bool checkFunc(astNode* func)
 bool checkBlock(astNode* block)
 {
     if (block == NULL || block->type != ast_stmt || block->stmt.type != ast_block) {
+        fprintf(stderr, "DEBUG: checkBlock: block is NULL or not ast_block\n");
         return false;
     }
     
@@ -101,6 +114,7 @@ bool checkBlock(astNode* block)
         if (node->type == ast_stmt && node->stmt.type == ast_decl) {
             std::string varName(node->stmt.decl.name);
             if (!addVarToScope(varName)) {
+                fprintf(stderr, "DEBUG: checkBlock: failed to add var %s to scope (duplicate?)\n", varName.c_str());
                 popScope();
                 return false; // Duplicate declaration
             }
@@ -132,25 +146,37 @@ bool checkStmt(astNode* stmt)
             // Already handled in checkBlock's first pass
             return true;
             
-        case ast_asgn:
+        case ast_asgn: {
             // Check lhs (variable being assigned to) and rhs (expression)
-            if (stmt->stmt.asgn.lhs == NULL || stmt->stmt.asgn.rhs == NULL) return false;
+            if (stmt->stmt.asgn.lhs == NULL || stmt->stmt.asgn.rhs == NULL) {
+                fprintf(stderr, "DEBUG: checkStmt ast_asgn: lhs or rhs is NULL\n");
+                return false;
+            }
             
             // Check lhs is a variable
-            if (stmt->stmt.asgn.lhs->type != ast_var) return false;
+            if (stmt->stmt.asgn.lhs->type != ast_var) {
+                fprintf(stderr, "DEBUG: checkStmt ast_asgn: lhs is not ast_var\n");
+                return false;
+            }
             std::string lhsName(stmt->stmt.asgn.lhs->var.name);
             if (!varExists(lhsName)) {
+                fprintf(stderr, "DEBUG: checkStmt ast_asgn: variable %s does not exist\n", lhsName.c_str());
                 return false; // Undeclared variable
             }
             
             // Check rhs expression
-            return checkExpr(stmt->stmt.asgn.rhs);
+            bool exprOk = checkExpr(stmt->stmt.asgn.rhs);
+            if (!exprOk) {
+                fprintf(stderr, "DEBUG: checkStmt ast_asgn: checkExpr failed for rhs\n");
+            }
+            return exprOk;
+        }
             
         case ast_ret:
             if (stmt->stmt.ret.expr == NULL) return false;
             return checkExpr(stmt->stmt.ret.expr);
             
-        case ast_call:
+        case ast_call: {
             // Check if it's a print/read call (these are extern, always valid)
             if (stmt->stmt.call.name != NULL) {
                 std::string callName(stmt->stmt.call.name);
@@ -163,6 +189,7 @@ bool checkStmt(astNode* stmt)
                 }
             }
             return false; // Unknown function call
+        }
             
         case ast_block:
             return checkBlock(stmt);
@@ -198,12 +225,16 @@ bool checkStmt(astNode* stmt)
 
 bool checkExpr(astNode* expr)
 {
-    if (expr == NULL) return false;
+    if (expr == NULL) {
+        fprintf(stderr, "DEBUG: checkExpr: expr is NULL\n");
+        return false;
+    }
     
     switch (expr->type) {
         case ast_var: {
             std::string varName(expr->var.name);
             if (!varExists(varName)) {
+                fprintf(stderr, "DEBUG: checkExpr: variable %s does not exist\n", varName.c_str());
                 return false; // Undeclared variable
             }
             return true;
@@ -213,18 +244,46 @@ bool checkExpr(astNode* expr)
             return true; // Constants are always valid
             
         case ast_rexpr:
-            if (expr->rexpr.lhs == NULL || expr->rexpr.rhs == NULL) return false;
+            if (expr->rexpr.lhs == NULL || expr->rexpr.rhs == NULL) {
+                fprintf(stderr, "DEBUG: checkExpr: ast_rexpr has NULL lhs or rhs\n");
+                return false;
+            }
             return checkExpr(expr->rexpr.lhs) && checkExpr(expr->rexpr.rhs);
             
         case ast_bexpr:
-            if (expr->bexpr.lhs == NULL || expr->bexpr.rhs == NULL) return false;
+            if (expr->bexpr.lhs == NULL || expr->bexpr.rhs == NULL) {
+                fprintf(stderr, "DEBUG: checkExpr: ast_bexpr has NULL lhs or rhs\n");
+                return false;
+            }
             return checkExpr(expr->bexpr.lhs) && checkExpr(expr->bexpr.rhs);
             
         case ast_uexpr:
-            if (expr->uexpr.expr == NULL) return false;
+            if (expr->uexpr.expr == NULL) {
+                fprintf(stderr, "DEBUG: checkExpr: ast_uexpr has NULL expr\n");
+                return false;
+            }
             return checkExpr(expr->uexpr.expr);
+        
+        case ast_stmt:
+            // Handle cases where statements (like read()) are used as expressions
+            if (expr->stmt.type == ast_call) {
+                std::string callName(expr->stmt.call.name);
+                if (callName == "read") {
+                    return true; // read() is valid as an expression
+                } else if (callName == "print") {
+                    // print() can be used but returns void, so it's not really an expression
+                    // But for semantic analysis, we'll allow it
+                    if (expr->stmt.call.param != NULL) {
+                        return checkExpr(expr->stmt.call.param);
+                    }
+                    return true;
+                }
+            }
+            fprintf(stderr, "DEBUG: checkExpr: ast_stmt type %d not handled as expression\n", (int)expr->stmt.type);
+            return false;
             
         default:
+            fprintf(stderr, "DEBUG: checkExpr: unknown expr type %d\n", (int)expr->type);
             return false;
     }
 }

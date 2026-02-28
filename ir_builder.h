@@ -5,8 +5,8 @@
 #include <llvm-c/Core.h>
 
 // IR Builder function
-// Input: AST root node
-// Output: LLVM module reference
+// input: AST root node
+// output: LLVM module reference
 LLVMModuleRef buildIR(astNode* root);
 
 #endif // IR_BUILDER_H

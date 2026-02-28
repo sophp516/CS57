@@ -67,7 +67,7 @@
 
 
 /* First part of user prologue.  */
-#line 7 "miniC.y"
+#line 7 "frontend/miniC.y"
 
     #include<stdio.h>
     #include "ast/ast.h"
@@ -80,7 +80,7 @@
 
     astNode* root;
 
-#line 84 "y.tab.c"
+#line 84 "frontend/y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -103,93 +103,7 @@
 #  endif
 # endif
 
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_YY_Y_TAB_H_INCLUDED
-# define YY_YY_Y_TAB_H_INCLUDED
-/* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
-/* "%code requires" blocks.  */
-#line 1 "miniC.y"
-
-    #include<vector>
-    #include<string>
-    #include "ast/ast.h"
-
-#line 125 "y.tab.c"
-
-/* Token kinds.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
-  {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    INT = 258,                     /* INT  */
-    RETURN = 259,                  /* RETURN  */
-    NUMBER = 260,                  /* NUMBER  */
-    IDENTIFIER = 261,              /* IDENTIFIER  */
-    EXTERN = 262,                  /* EXTERN  */
-    VOID = 263,                    /* VOID  */
-    PRINT = 264,                   /* PRINT  */
-    READ = 265,                    /* READ  */
-    IF = 266,                      /* IF  */
-    ELSE = 267,                    /* ELSE  */
-    WHILE = 268                    /* WHILE  */
-  };
-  typedef enum yytokentype yytoken_kind_t;
-#endif
-/* Token kinds.  */
-#define YYEMPTY -2
-#define YYEOF 0
-#define YYerror 256
-#define YYUNDEF 257
-#define INT 258
-#define RETURN 259
-#define NUMBER 260
-#define IDENTIFIER 261
-#define EXTERN 262
-#define VOID 263
-#define PRINT 264
-#define READ 265
-#define IF 266
-#define ELSE 267
-#define WHILE 268
-
-/* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 20 "miniC.y"
-
-    astNode* node;
-    std::vector<astNode*>* stmt_list;
-    char* name;
-    int num;
-
-#line 178 "y.tab.c"
-
-};
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
-#endif
-
-
-extern YYSTYPE yylval;
-
-
-int yyparse (void);
-
-
-#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
+#include "y.tab.h"
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -1256,128 +1170,128 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* prog: extern_print extern_read func  */
-#line 45 "miniC.y"
+#line 45 "frontend/miniC.y"
                                      { root = createProg((yyvsp[-2].node), (yyvsp[-1].node), (yyvsp[0].node)); }
-#line 1262 "y.tab.c"
+#line 1176 "frontend/y.tab.c"
     break;
 
   case 3: /* extern_print: EXTERN VOID PRINT '(' INT ')' ';'  */
-#line 46 "miniC.y"
+#line 46 "frontend/miniC.y"
                                                  { (yyval.node) = createExtern("print"); }
-#line 1268 "y.tab.c"
+#line 1182 "frontend/y.tab.c"
     break;
 
   case 4: /* extern_read: EXTERN INT READ '(' ')' ';'  */
-#line 47 "miniC.y"
+#line 47 "frontend/miniC.y"
                                           { (yyval.node) = createExtern("read"); }
-#line 1274 "y.tab.c"
+#line 1188 "frontend/y.tab.c"
     break;
 
   case 5: /* func: INT IDENTIFIER '(' param ')' block_stmt  */
-#line 48 "miniC.y"
+#line 48 "frontend/miniC.y"
                                                { (yyval.node) = createFunc((yyvsp[-4].name), (yyvsp[-2].node), (yyvsp[0].node)); }
-#line 1280 "y.tab.c"
+#line 1194 "frontend/y.tab.c"
     break;
 
   case 6: /* param: INT IDENTIFIER  */
-#line 49 "miniC.y"
+#line 49 "frontend/miniC.y"
                        { (yyval.node) = createVar((yyvsp[0].name)); }
-#line 1286 "y.tab.c"
+#line 1200 "frontend/y.tab.c"
     break;
 
   case 7: /* param: %empty  */
-#line 50 "miniC.y"
+#line 50 "frontend/miniC.y"
                     { (yyval.node) = NULL; }
-#line 1292 "y.tab.c"
+#line 1206 "frontend/y.tab.c"
     break;
 
   case 8: /* block_stmt: '{' decl_list stmt_list '}'  */
-#line 51 "miniC.y"
+#line 51 "frontend/miniC.y"
                                          { 
                                             (yyvsp[-2].stmt_list)->insert((yyvsp[-2].stmt_list)->end(), (yyvsp[-1].stmt_list)->begin(), (yyvsp[-1].stmt_list)->end());
                                             (yyval.node) = createBlock((yyvsp[-2].stmt_list));
                                             delete (yyvsp[-1].stmt_list);
                                          }
-#line 1302 "y.tab.c"
+#line 1216 "frontend/y.tab.c"
     break;
 
   case 9: /* block_stmt: '{' '}'  */
-#line 56 "miniC.y"
+#line 56 "frontend/miniC.y"
                      { (yyval.node) = createBlock(new std::vector<astNode*>()); }
-#line 1308 "y.tab.c"
+#line 1222 "frontend/y.tab.c"
     break;
 
   case 10: /* stmt_list: stmt_list stmt  */
-#line 57 "miniC.y"
+#line 57 "frontend/miniC.y"
                            { (yyvsp[-1].stmt_list)->push_back((yyvsp[0].node)); (yyval.stmt_list) = (yyvsp[-1].stmt_list); }
-#line 1314 "y.tab.c"
+#line 1228 "frontend/y.tab.c"
     break;
 
   case 11: /* stmt_list: %empty  */
-#line 58 "miniC.y"
+#line 58 "frontend/miniC.y"
                         { (yyval.stmt_list) = new std::vector<astNode*>(); }
-#line 1320 "y.tab.c"
+#line 1234 "frontend/y.tab.c"
     break;
 
   case 12: /* decl_list: decl_list decl  */
-#line 59 "miniC.y"
+#line 59 "frontend/miniC.y"
                            { (yyvsp[-1].stmt_list)->push_back((yyvsp[0].node)); (yyval.stmt_list) = (yyvsp[-1].stmt_list); }
-#line 1326 "y.tab.c"
+#line 1240 "frontend/y.tab.c"
     break;
 
   case 13: /* decl_list: %empty  */
-#line 60 "miniC.y"
+#line 60 "frontend/miniC.y"
                         { (yyval.stmt_list) = new std::vector<astNode*>(); }
-#line 1332 "y.tab.c"
+#line 1246 "frontend/y.tab.c"
     break;
 
   case 20: /* if_block: IF '(' relational_expr ')' block_stmt ELSE block_stmt  */
-#line 67 "miniC.y"
+#line 67 "frontend/miniC.y"
                                                                  { (yyval.node) = createIf((yyvsp[-4].node), (yyvsp[-2].node), (yyvsp[0].node)); }
-#line 1338 "y.tab.c"
+#line 1252 "frontend/y.tab.c"
     break;
 
   case 21: /* if_block: IF '(' relational_expr ')' block_stmt ELSE stmt  */
-#line 68 "miniC.y"
+#line 68 "frontend/miniC.y"
                                                            {
                                                                     std::vector<astNode*>* else_block = new std::vector<astNode*>();
                                                                     else_block->push_back((yyvsp[0].node));
                                                                     astNode* else_node = createBlock(else_block);
                                                                     (yyval.node) = createIf((yyvsp[-4].node), (yyvsp[-2].node), else_node);
                                                                   }
-#line 1349 "y.tab.c"
+#line 1263 "frontend/y.tab.c"
     break;
 
   case 22: /* if_block: IF '(' relational_expr ')' block_stmt  */
-#line 74 "miniC.y"
+#line 74 "frontend/miniC.y"
                                                  { (yyval.node) = createIf((yyvsp[-2].node), (yyvsp[0].node)); }
-#line 1355 "y.tab.c"
+#line 1269 "frontend/y.tab.c"
     break;
 
   case 23: /* if_block: IF '(' relational_expr ')' stmt  */
-#line 75 "miniC.y"
+#line 75 "frontend/miniC.y"
                                            {
                                              std::vector<astNode*>* then_block = new std::vector<astNode*>();
                                              then_block->push_back((yyvsp[0].node));
                                              astNode* then_node = createBlock(then_block);
                                              (yyval.node) = createIf((yyvsp[-2].node), then_node);
                                            }
-#line 1366 "y.tab.c"
+#line 1280 "frontend/y.tab.c"
     break;
 
   case 24: /* if_block: IF '(' relational_expr ')' stmt ELSE block_stmt  */
-#line 81 "miniC.y"
+#line 81 "frontend/miniC.y"
                                                            {
                                                              std::vector<astNode*>* then_block = new std::vector<astNode*>();
                                                              then_block->push_back((yyvsp[-2].node));
                                                              astNode* then_node = createBlock(then_block);
                                                              (yyval.node) = createIf((yyvsp[-4].node), then_node, (yyvsp[0].node));
                                                            }
-#line 1377 "y.tab.c"
+#line 1291 "frontend/y.tab.c"
     break;
 
   case 25: /* if_block: IF '(' relational_expr ')' stmt ELSE stmt  */
-#line 87 "miniC.y"
+#line 87 "frontend/miniC.y"
                                                      {
                                                        std::vector<astNode*>* then_block = new std::vector<astNode*>();
                                                        then_block->push_back((yyvsp[-2].node));
@@ -1387,148 +1301,148 @@ yyreduce:
                                                        astNode* else_node = createBlock(else_block);
                                                        (yyval.node) = createIf((yyvsp[-4].node), then_node, else_node);
                                                      }
-#line 1391 "y.tab.c"
+#line 1305 "frontend/y.tab.c"
     break;
 
   case 26: /* while_block: WHILE '(' relational_expr ')' block_stmt  */
-#line 96 "miniC.y"
+#line 96 "frontend/miniC.y"
                                                        { (yyval.node) = createWhile((yyvsp[-2].node), (yyvsp[0].node)); }
-#line 1397 "y.tab.c"
+#line 1311 "frontend/y.tab.c"
     break;
 
   case 27: /* while_block: WHILE '(' relational_expr ')' stmt  */
-#line 97 "miniC.y"
+#line 97 "frontend/miniC.y"
                                                  {
                                                    std::vector<astNode*>* body_block = new std::vector<astNode*>();
                                                    body_block->push_back((yyvsp[0].node));
                                                    astNode* body_node = createBlock(body_block);
                                                    (yyval.node) = createWhile((yyvsp[-2].node), body_node);
                                                  }
-#line 1408 "y.tab.c"
+#line 1322 "frontend/y.tab.c"
     break;
 
   case 28: /* decl: INT IDENTIFIER ';'  */
-#line 103 "miniC.y"
+#line 103 "frontend/miniC.y"
                           { (yyval.node) = createDecl((yyvsp[-1].name)); }
-#line 1414 "y.tab.c"
+#line 1328 "frontend/y.tab.c"
     break;
 
   case 29: /* assign: IDENTIFIER '=' arithmetic_expr ';'  */
-#line 104 "miniC.y"
+#line 104 "frontend/miniC.y"
                                             { (yyval.node) = createAsgn(createVar((yyvsp[-3].name)), (yyvsp[-1].node)); }
-#line 1420 "y.tab.c"
+#line 1334 "frontend/y.tab.c"
     break;
 
   case 30: /* assign: IDENTIFIER '=' read_fn ';'  */
-#line 105 "miniC.y"
+#line 105 "frontend/miniC.y"
                                     { (yyval.node) = createAsgn(createVar((yyvsp[-3].name)), (yyvsp[-1].node)); }
-#line 1426 "y.tab.c"
+#line 1340 "frontend/y.tab.c"
     break;
 
   case 31: /* return: RETURN expr ';'  */
-#line 106 "miniC.y"
+#line 106 "frontend/miniC.y"
                          { (yyval.node) = createRet((yyvsp[-1].node)); }
-#line 1432 "y.tab.c"
+#line 1346 "frontend/y.tab.c"
     break;
 
   case 34: /* print_fn: PRINT '(' arithmetic_expr ')' ';'  */
-#line 108 "miniC.y"
+#line 108 "frontend/miniC.y"
                                              { (yyval.node) = createCall("print", (yyvsp[-2].node)); }
-#line 1438 "y.tab.c"
+#line 1352 "frontend/y.tab.c"
     break;
 
   case 35: /* read_fn: READ '(' ')'  */
-#line 109 "miniC.y"
+#line 109 "frontend/miniC.y"
                        { (yyval.node) = createCall("read", NULL); }
-#line 1444 "y.tab.c"
+#line 1358 "frontend/y.tab.c"
     break;
 
   case 36: /* arithmetic_expr: term  */
-#line 110 "miniC.y"
+#line 110 "frontend/miniC.y"
                        { (yyval.node) = (yyvsp[0].node); }
-#line 1450 "y.tab.c"
+#line 1364 "frontend/y.tab.c"
     break;
 
   case 37: /* arithmetic_expr: '-' term  */
-#line 111 "miniC.y"
+#line 111 "frontend/miniC.y"
                            { (yyval.node) = createUExpr((yyvsp[0].node), uminus); }
-#line 1456 "y.tab.c"
+#line 1370 "frontend/y.tab.c"
     break;
 
   case 38: /* arithmetic_expr: term '*' term  */
-#line 112 "miniC.y"
+#line 112 "frontend/miniC.y"
                                 { (yyval.node) = createBExpr((yyvsp[-2].node), (yyvsp[0].node), mul); }
-#line 1462 "y.tab.c"
+#line 1376 "frontend/y.tab.c"
     break;
 
   case 39: /* arithmetic_expr: term '+' term  */
-#line 113 "miniC.y"
+#line 113 "frontend/miniC.y"
                                 { (yyval.node) = createBExpr((yyvsp[-2].node), (yyvsp[0].node), add); }
-#line 1468 "y.tab.c"
+#line 1382 "frontend/y.tab.c"
     break;
 
   case 40: /* arithmetic_expr: term '-' term  */
-#line 114 "miniC.y"
+#line 114 "frontend/miniC.y"
                                 { (yyval.node) = createBExpr((yyvsp[-2].node), (yyvsp[0].node), sub); }
-#line 1474 "y.tab.c"
+#line 1388 "frontend/y.tab.c"
     break;
 
   case 41: /* relational_expr: term '<' term  */
-#line 115 "miniC.y"
+#line 115 "frontend/miniC.y"
                                 { (yyval.node) = createRExpr((yyvsp[-2].node), (yyvsp[0].node), lt); }
-#line 1480 "y.tab.c"
+#line 1394 "frontend/y.tab.c"
     break;
 
   case 42: /* relational_expr: term '<' '=' term  */
-#line 116 "miniC.y"
+#line 116 "frontend/miniC.y"
                                     { (yyval.node) = createRExpr((yyvsp[-3].node), (yyvsp[0].node), le); }
-#line 1486 "y.tab.c"
+#line 1400 "frontend/y.tab.c"
     break;
 
   case 43: /* relational_expr: term '>' term  */
-#line 117 "miniC.y"
+#line 117 "frontend/miniC.y"
                                 { (yyval.node) = createRExpr((yyvsp[-2].node), (yyvsp[0].node), gt); }
-#line 1492 "y.tab.c"
+#line 1406 "frontend/y.tab.c"
     break;
 
   case 44: /* relational_expr: term '>' '=' term  */
-#line 118 "miniC.y"
+#line 118 "frontend/miniC.y"
                                     { (yyval.node) = createRExpr((yyvsp[-3].node), (yyvsp[0].node), ge); }
-#line 1498 "y.tab.c"
+#line 1412 "frontend/y.tab.c"
     break;
 
   case 45: /* relational_expr: term '=' '=' term  */
-#line 119 "miniC.y"
+#line 119 "frontend/miniC.y"
                                     { (yyval.node) = createRExpr((yyvsp[-3].node), (yyvsp[0].node), eq); }
-#line 1504 "y.tab.c"
+#line 1418 "frontend/y.tab.c"
     break;
 
   case 46: /* term: NUMBER  */
-#line 120 "miniC.y"
+#line 120 "frontend/miniC.y"
               { (yyval.node) = createCnst((yyvsp[0].num)); }
-#line 1510 "y.tab.c"
+#line 1424 "frontend/y.tab.c"
     break;
 
   case 47: /* term: IDENTIFIER  */
-#line 121 "miniC.y"
+#line 121 "frontend/miniC.y"
                   { (yyval.node) = createVar((yyvsp[0].name)); }
-#line 1516 "y.tab.c"
+#line 1430 "frontend/y.tab.c"
     break;
 
   case 48: /* term: '(' arithmetic_expr ')'  */
-#line 122 "miniC.y"
+#line 122 "frontend/miniC.y"
                                { (yyval.node) = (yyvsp[-1].node); }
-#line 1522 "y.tab.c"
+#line 1436 "frontend/y.tab.c"
     break;
 
   case 49: /* term: '(' relational_expr ')'  */
-#line 123 "miniC.y"
+#line 123 "frontend/miniC.y"
                                { (yyval.node) = (yyvsp[-1].node); }
-#line 1528 "y.tab.c"
+#line 1442 "frontend/y.tab.c"
     break;
 
 
-#line 1532 "y.tab.c"
+#line 1446 "frontend/y.tab.c"
 
       default: break;
     }
@@ -1721,7 +1635,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 124 "miniC.y"
+#line 124 "frontend/miniC.y"
 
 
 int yyerror(char *s) {
@@ -1729,6 +1643,8 @@ int yyerror(char *s) {
     return 0;
 }
 
+// Main function moved to assignments/main.c
+/*
 int main(int argc, char* argv[]) {
     if (argc == 2) {
         yyin = fopen(argv[1], "r");
@@ -1754,3 +1670,4 @@ int main(int argc, char* argv[]) {
     yylex_destroy();
     return(0);
 }
+*/

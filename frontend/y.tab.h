@@ -35,8 +35,8 @@
    especially those whose name start with YY_ or yy_.  They are
    private implementation details that can be changed or removed.  */
 
-#ifndef YY_YY_Y_TAB_H_INCLUDED
-# define YY_YY_Y_TAB_H_INCLUDED
+#ifndef YY_YY_FRONTEND_Y_TAB_H_INCLUDED
+# define YY_YY_FRONTEND_Y_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -45,13 +45,13 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 1 "miniC.y"
+#line 1 "frontend/miniC.y"
 
-    #include<vector>
-    #include<string>
+    #include <vector>
+    #include <string>
     #include "ast/ast.h"
 
-#line 55 "y.tab.h"
+#line 55 "frontend/y.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -76,35 +76,19 @@ extern int yydebug;
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Token kinds.  */
-#define YYEMPTY -2
-#define YYEOF 0
-#define YYerror 256
-#define YYUNDEF 257
-#define INT 258
-#define RETURN 259
-#define NUMBER 260
-#define IDENTIFIER 261
-#define EXTERN 262
-#define VOID 263
-#define PRINT 264
-#define READ 265
-#define IF 266
-#define ELSE 267
-#define WHILE 268
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 20 "miniC.y"
+#line 20 "frontend/miniC.y"
 
     astNode* node;
     std::vector<astNode*>* stmt_list;
     char* name;
     int num;
 
-#line 108 "y.tab.h"
+#line 92 "frontend/y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -119,4 +103,4 @@ extern YYSTYPE yylval;
 int yyparse (void);
 
 
-#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
+#endif /* !YY_YY_FRONTEND_Y_TAB_H_INCLUDED  */

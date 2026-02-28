@@ -74,8 +74,10 @@ int main(int argc, char** argv) {
         optimized_module = module;
     }
     
-    // Print optimized module to file (optional - for debugging)
-    // LLVMPrintModuleToFile(optimized_module, "output.ll", NULL);
+    // Print optimized module to file for verification
+    char output_file[256];
+    snprintf(output_file, sizeof(output_file), "%s.ll", filename);
+    LLVMPrintModuleToFile(optimized_module, output_file, NULL);
     
     freeNode(root);
     yylex_destroy();
