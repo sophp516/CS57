@@ -129,9 +129,6 @@ static void preprocessVars(LLVMBuilderRef builder, std::map<std::string, LLVMVal
                 
                 LLVMTypeRef intType = LLVMInt32Type();
                 LLVMValueRef alloca = LLVMBuildAlloca(builder, intType, newVarName);
-            
-                // Note: // LLVMSetAlignment may cause issues - try without it first
-                // // LLVMSetAlignment(alloca, 4);
                 
                 varMap[std::string(newVarName)] = alloca;
                 
