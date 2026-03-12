@@ -9,11 +9,12 @@ LLVM_CONFIG = llvm-config-17
 FRONTEND_DIR = frontend
 IR_BUILDER_DIR = llvm_ir_builder
 OPTIMIZER_DIR = optimizations
+BACKEND_DIR = backend
 AST_DIR = $(FRONTEND_DIR)/ast
 
 # Compiler flags
-CFLAGS = -Wall -g -I /usr/include/llvm-c-17/
-CXXFLAGS = -Wall -g -std=c++11 -I /usr/include/llvm-c-17/
+CFLAGS = -Wall -g -I. -I$(BACKEND_DIR) -I /usr/include/llvm-c-17/
+CXXFLAGS = -Wall -g -std=c++11 -I. -I$(BACKEND_DIR) -I /usr/include/llvm-c-17/
 LDFLAGS = -ll -ly
 
 # LLVM flags
@@ -38,6 +39,7 @@ AST_OBJ = $(AST_DIR)/ast.o
 SEMANTIC_OBJ = $(FRONTEND_DIR)/semantic_analysis.o
 IR_BUILDER_OBJ = ir_builder.o
 OPTIMIZER_OBJ = $(OPTIMIZER_DIR)/llvm_parser.o optimizer.o
+BACKEND_OBJ = $(BACKEND_DIR)/register_alloc.o $(BACKEND_DIR)/assembly_gen.o
 MAIN_OBJ = main.o
 LEX_OBJ = $(FRONTEND_DIR)/lex.yy.o
 YACC_OBJ = $(FRONTEND_DIR)/y.tab.o
@@ -49,8 +51,8 @@ TARGET = miniC_compiler
 all: $(TARGET)
 
 # Main executable
-$(TARGET): $(LEX_OBJ) $(YACC_OBJ) $(AST_OBJ) $(SEMANTIC_OBJ) ir_builder.o $(IR_BUILDER_DIR)/builder.o $(OPTIMIZER_DIR)/llvm_parser.o optimizer.o $(MAIN_OBJ)
-	$(CXX) $(CXXFLAGS) $(LEX_OBJ) $(YACC_OBJ) $(AST_OBJ) $(SEMANTIC_OBJ) ir_builder.o $(IR_BUILDER_DIR)/builder.o $(OPTIMIZER_DIR)/llvm_parser.o optimizer.o $(MAIN_OBJ) -o $(TARGET) $(LDFLAGS) $(LLVM_LDFLAGS)
+$(TARGET): $(LEX_OBJ) $(YACC_OBJ) $(AST_OBJ) $(SEMANTIC_OBJ) ir_builder.o $(IR_BUILDER_DIR)/builder.o $(OPTIMIZER_DIR)/llvm_parser.o optimizer.o $(BACKEND_OBJ) $(MAIN_OBJ)
+	$(CXX) $(CXXFLAGS) $(LEX_OBJ) $(YACC_OBJ) $(AST_OBJ) $(SEMANTIC_OBJ) ir_builder.o $(IR_BUILDER_DIR)/builder.o $(OPTIMIZER_DIR)/llvm_parser.o optimizer.o $(BACKEND_OBJ) $(MAIN_OBJ) -o $(TARGET) $(LDFLAGS) $(LLVM_LDFLAGS)
 
 # Generate lexer
 $(LEX_GENERATED): $(LEX_SOURCE) $(FRONTEND_DIR)/y.tab.h
@@ -85,14 +87,20 @@ $(OPTIMIZER_DIR)/llvm_parser.o: $(OPTIMIZER_DIR)/llvm_parser.c optimizer.h
 optimizer.o: optimizer.c optimizer.h
 	$(CXX) $(CXXFLAGS) -c optimizer.c -o optimizer.o
 
-$(MAIN_OBJ): $(MAIN_SOURCE) semantic_analysis.h ir_builder.h optimizer.h
+$(BACKEND_DIR)/register_alloc.o: $(BACKEND_DIR)/register_alloc.c $(BACKEND_DIR)/register_alloc.h
+	$(CC) $(CFLAGS) -c $(BACKEND_DIR)/register_alloc.c -o $(BACKEND_DIR)/register_alloc.o
+
+$(BACKEND_DIR)/assembly_gen.o: $(BACKEND_DIR)/assembly_gen.c $(BACKEND_DIR)/assembly_gen.h $(BACKEND_DIR)/register_alloc.h
+	$(CC) $(CFLAGS) -c $(BACKEND_DIR)/assembly_gen.c -o $(BACKEND_DIR)/assembly_gen.o
+
+$(MAIN_OBJ): $(MAIN_SOURCE) semantic_analysis.h ir_builder.h optimizer.h backend/assembly_gen.h
 	$(CXX) $(CXXFLAGS) -c $(MAIN_SOURCE) -o $(MAIN_OBJ)
 
 # Clean target
 clean:
 	rm -f $(TARGET)
 	rm -f $(LEX_GENERATED) $(YACC_GENERATED)
-	rm -f $(AST_OBJ) $(SEMANTIC_OBJ) ir_builder.o $(IR_BUILDER_DIR)/builder.o $(OPTIMIZER_DIR)/llvm_parser.o optimizer.o $(MAIN_OBJ) $(LEX_OBJ) $(YACC_OBJ)
+	rm -f $(AST_OBJ) $(SEMANTIC_OBJ) ir_builder.o $(IR_BUILDER_DIR)/builder.o $(OPTIMIZER_DIR)/llvm_parser.o optimizer.o $(BACKEND_DIR)/*.o $(MAIN_OBJ) $(LEX_OBJ) $(YACC_OBJ)
 	rm -f *.o $(FRONTEND_DIR)/*.o $(IR_BUILDER_DIR)/*.o $(OPTIMIZER_DIR)/*.o $(AST_DIR)/*.o
 
 .PHONY: all clean

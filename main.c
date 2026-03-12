@@ -10,6 +10,15 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/IRReader.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "backend/register_alloc.h"
+#include "backend/assembly_gen.h"
+#ifdef __cplusplus
+}
+#endif
+
 // External variables from parser
 extern astNode* root;
 extern FILE *yyin;
@@ -74,15 +83,43 @@ int main(int argc, char** argv) {
         optimized_module = module;
     }
     
-    // Print optimized module to file for verification
-    char output_file[256];
-    snprintf(output_file, sizeof(output_file), "%s.ll", filename);
-    LLVMPrintModuleToFile(optimized_module, output_file, NULL);
-    
+    // Print optimized LLVM IR to file
+    char output_ll[256];
+    char output_s[256];
+    size_t len = strlen(filename);
+    if (len >= 2 && filename[len - 2] == '.' && filename[len - 1] == 'c') {
+        snprintf(output_ll, sizeof(output_ll), "%.*s.ll", (int)(len - 2), filename);
+        snprintf(output_s, sizeof(output_s), "%.*s.s", (int)(len - 2), filename);
+    } else {
+        snprintf(output_ll, sizeof(output_ll), "%s.ll", filename);
+        snprintf(output_s, sizeof(output_s), "%s.s", filename);
+    }
+    LLVMPrintModuleToFile(optimized_module, output_ll, NULL);
+
+    // run register allocation
+    RegMap reg_map;
+    reg_map_init(&reg_map);
+    local_register_allocation_module(optimized_module, &reg_map);
+
+    // run assembly code builder
+    FILE *asm_out = fopen(output_s, "w");
+    if (asm_out == NULL) {
+        fprintf(stderr, "Error: Cannot open output file '%s'\n", output_s);
+        reg_map_clear(&reg_map);
+        freeNode(root);
+        yylex_destroy();
+        LLVMDisposeModule(optimized_module);
+        LLVMShutdown();
+        return 1;
+    }
+    emit_assembly(optimized_module, &reg_map, asm_out);
+    fclose(asm_out);
+    reg_map_clear(&reg_map);
+
     freeNode(root);
     yylex_destroy();
     LLVMDisposeModule(optimized_module);
     LLVMShutdown();
-    
+
     return 0;
 }
